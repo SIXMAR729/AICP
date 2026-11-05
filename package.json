@@ -1,33 +1,60 @@
 {
   "name": "@aicp/core",
-  "version": "1.0.0",
-  "description": "The open standard for Agentic E-Commerce core TypeScript types and validators",
+  "version": "1.1.0",
+  "description": "AICP v1 (AI Commerce Protocol): agent client, RFC 9421 signatures, webhook receiver, contract validator and spec",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "spec",
+    "docs",
+    "examples",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/validator.test.ts src/protocol.test.ts src/client.test.ts",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
   },
   "keywords": [
-    "aicp",
+    "acp",
+    "agent",
+    "agentic",
     "ai",
+    "aicp",
     "commerce",
+    "mcp",
     "protocol",
+    "rfc9421",
     "schema",
-    "agentic"
+    "ucp",
+    "webhooks"
   ],
-  "author": "",
+  "author": "SIXMAR",
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^26.2.0",
     "tsup": "^8.0.0",
+    "tsx": "^4.23.11",
     "typescript": "^5.0.0"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SIXMAR729/AICP.git"
   }
 }
