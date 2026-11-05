@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { validateAICPAnswers } from './validator';
+import { validateAICPAnswers, toJsonSchema } from './validator';
 import { AICPOrderSchema, AICPOrderPayload } from './types';
 
 describe('validateAICPAnswers', () => {
@@ -150,5 +150,46 @@ describe('validateAICPAnswers', () => {
     const result = validateAICPAnswers(sampleSchema, payload);
     assert.equal(result.isValid, true);
     assert.equal(result.errors.length, 0);
+  });
+
+  it('should convert AICPOrderSchema to standard JSON Schema for MCP / LLM function calling', () => {
+    const jsonSchema = toJsonSchema({
+      ...sampleSchema,
+      fields: {
+        ...sampleSchema.fields,
+        email: { type: 'email', description: 'Contact email', required: true },
+        agree_terms: { type: 'boolean', description: 'Accept rental terms' },
+      },
+    });
+
+    assert.deepEqual(jsonSchema, {
+      type: 'object',
+      description: 'Collect booking details politely.',
+      properties: {
+        customer_name: { type: 'string', description: 'Name of the customer' },
+        phone: {
+          type: 'string',
+          description: '10-digit phone number starting with 0',
+          pattern: '^0[0-9]{9}$',
+        },
+        days: {
+          type: 'number',
+          description: 'Number of rental days',
+          minimum: 1,
+          maximum: 30,
+        },
+        email: {
+          type: 'string',
+          description: 'Contact email',
+          format: 'email',
+        },
+        agree_terms: {
+          type: 'boolean',
+          description: 'Accept rental terms',
+        },
+      },
+      required: ['customer_name', 'phone', 'days', 'email'],
+      additionalProperties: false,
+    });
   });
 });

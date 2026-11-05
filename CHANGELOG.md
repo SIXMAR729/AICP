@@ -8,6 +8,8 @@
 - `generateSigningKey()` / `signingKeyFromPrivateJwk()` (ES256, Ed25519; `kid` = RFC 7638).
 - `createWebhookHandler()` Fetch-API receiver (verify, challenge, dedupe, ordering, retry-safe on handler failure).
 - `WebhookOrderTracker.forget()` to undo `shouldApply()` when processing fails.
+- `toJsonSchema()` to convert `AICPOrderSchema` into JSON Schema for MCP `inputSchema` and LLM function calling.
+- Extensible `CurrencyCode`, `PaymentProvider`, and `AICPIntent` types for multi-currency and custom platform providers.
 - More `AICP_ERROR_CODES` from the reference platform.
 - Docs: agent quickstart, webhooks, error reference; examples; spec §0 base path, §10 error format.
 

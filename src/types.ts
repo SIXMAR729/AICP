@@ -1,6 +1,6 @@
 // src/types.ts
 
-export type AICPIntent = 'booking' | 'order' | 'inquiry';
+export type AICPIntent = 'booking' | 'order' | 'inquiry' | (string & {});
 export type FieldType = 'text' | 'tel' | 'number' | 'date' | 'boolean' | 'email';
 
 export interface AICPFieldDefinition {

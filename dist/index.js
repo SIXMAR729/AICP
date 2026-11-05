@@ -51,6 +51,7 @@ __export(index_exports, {
   signMessage: () => signMessage,
   signatureBase: () => signatureBase,
   signingKeyFromPrivateJwk: () => signingKeyFromPrivateJwk,
+  toJsonSchema: () => toJsonSchema,
   validateAICPAnswers: () => validateAICPAnswers,
   verifyRequestSignature: () => verifyRequestSignature,
   verifyWebhookSignature: () => verifyWebhookSignature,
@@ -59,6 +60,34 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/validator.ts
+function toJsonSchema(schema) {
+  const properties = {};
+  const requiredSet = new Set(schema.required);
+  for (const [key, field] of Object.entries(schema.fields)) {
+    if (field.required) requiredSet.add(key);
+    if (field.type === "number") {
+      const prop = { type: "number", description: field.description };
+      if (field.min !== void 0) prop.minimum = field.min;
+      if (field.max !== void 0) prop.maximum = field.max;
+      properties[key] = prop;
+    } else if (field.type === "boolean") {
+      properties[key] = { type: "boolean", description: field.description };
+    } else {
+      const prop = { type: "string", description: field.description };
+      if (field.pattern !== void 0) prop.pattern = field.pattern;
+      if (field.type === "email") prop.format = "email";
+      else if (field.type === "date") prop.format = "date";
+      properties[key] = prop;
+    }
+  }
+  return {
+    type: "object",
+    ...schema.ai_prompt ? { description: schema.ai_prompt } : {},
+    properties,
+    required: Array.from(requiredSet),
+    additionalProperties: false
+  };
+}
 function validateAICPAnswers(schema, payload) {
   const errors = [];
   const { answers } = payload;
@@ -652,6 +681,7 @@ function createWebhookHandler(options) {
   signMessage,
   signatureBase,
   signingKeyFromPrivateJwk,
+  toJsonSchema,
   validateAICPAnswers,
   verifyRequestSignature,
   verifyWebhookSignature,

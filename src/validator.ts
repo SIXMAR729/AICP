@@ -6,6 +6,59 @@ export interface ValidationResult {
   errors: Array<{ field: string; message: string }>;
 }
 
+export interface AICPJsonSchemaProperty {
+  type: 'string' | 'number' | 'boolean';
+  description: string;
+  pattern?: string;
+  format?: 'email' | 'date';
+  minimum?: number;
+  maximum?: number;
+}
+
+export interface AICPJsonSchema {
+  type: 'object';
+  description?: string;
+  properties: Record<string, AICPJsonSchemaProperty>;
+  required: string[];
+  additionalProperties: boolean;
+}
+
+/**
+ * Converts an AICPOrderSchema into a standard JSON Schema object suitable for
+ * MCP tool `inputSchema` or LLM function-calling parameters (OpenAI, Claude, Gemini).
+ */
+export function toJsonSchema(schema: AICPOrderSchema): AICPJsonSchema {
+  const properties: Record<string, AICPJsonSchemaProperty> = {};
+  const requiredSet = new Set<string>(schema.required);
+
+  for (const [key, field] of Object.entries(schema.fields)) {
+    if (field.required) requiredSet.add(key);
+
+    if (field.type === 'number') {
+      const prop: AICPJsonSchemaProperty = { type: 'number', description: field.description };
+      if (field.min !== undefined) prop.minimum = field.min;
+      if (field.max !== undefined) prop.maximum = field.max;
+      properties[key] = prop;
+    } else if (field.type === 'boolean') {
+      properties[key] = { type: 'boolean', description: field.description };
+    } else {
+      const prop: AICPJsonSchemaProperty = { type: 'string', description: field.description };
+      if (field.pattern !== undefined) prop.pattern = field.pattern;
+      if (field.type === 'email') prop.format = 'email';
+      else if (field.type === 'date') prop.format = 'date';
+      properties[key] = prop;
+    }
+  }
+
+  return {
+    type: 'object',
+    ...(schema.ai_prompt ? { description: schema.ai_prompt } : {}),
+    properties,
+    required: Array.from(requiredSet),
+    additionalProperties: false,
+  };
+}
+
 export function validateAICPAnswers(schema: AICPOrderSchema, payload: AICPOrderPayload): ValidationResult {
   const errors: Array<{ field: string; message: string }> = [];
   const { answers } = payload;

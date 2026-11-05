@@ -1,4 +1,4 @@
-type AICPIntent = 'booking' | 'order' | 'inquiry';
+type AICPIntent = 'booking' | 'order' | 'inquiry' | (string & {});
 type FieldType = 'text' | 'tel' | 'number' | 'date' | 'boolean' | 'email';
 interface AICPFieldDefinition {
     type: FieldType;
@@ -29,6 +29,26 @@ interface ValidationResult {
         message: string;
     }>;
 }
+interface AICPJsonSchemaProperty {
+    type: 'string' | 'number' | 'boolean';
+    description: string;
+    pattern?: string;
+    format?: 'email' | 'date';
+    minimum?: number;
+    maximum?: number;
+}
+interface AICPJsonSchema {
+    type: 'object';
+    description?: string;
+    properties: Record<string, AICPJsonSchemaProperty>;
+    required: string[];
+    additionalProperties: boolean;
+}
+/**
+ * Converts an AICPOrderSchema into a standard JSON Schema object suitable for
+ * MCP tool `inputSchema` or LLM function-calling parameters (OpenAI, Claude, Gemini).
+ */
+declare function toJsonSchema(schema: AICPOrderSchema): AICPJsonSchema;
 declare function validateAICPAnswers(schema: AICPOrderSchema, payload: AICPOrderPayload): ValidationResult;
 
 type PublicSigningJwk = {
@@ -100,7 +120,8 @@ declare const AICP_PROTOCOL_VERSION = "1.0";
 declare const AICP_WEBHOOK_API_VERSION = "2026-10-21";
 type AgentApprovalStatus = 'PENDING' | 'APPROVED' | 'EXPIRED' | 'REVOKED';
 type OrderStatus = 'pending_confirmation' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-type PaymentProvider = 'promptpay' | 'cash_on_delivery';
+type CurrencyCode = 'THB' | (string & {});
+type PaymentProvider = 'promptpay' | 'cash_on_delivery' | (string & {});
 interface AgentProfile {
     agent_id: string;
     agent_name: string;
@@ -153,7 +174,7 @@ interface PrepareDeliveryResponse {
     subtotal: number;
     delivery_fee: number;
     total: number;
-    currency: 'THB';
+    currency: CurrencyCode;
     expires_at: number;
     message: string;
     messages: AICPMessage[];
@@ -174,7 +195,7 @@ interface WebhookEvent {
         order_version: number | null;
         occurred_at: string | null;
         total: number;
-        currency: 'THB';
+        currency: CurrencyCode;
         updated_at: string;
         tracking_url: string | null;
     };
@@ -389,4 +410,4 @@ interface WebhookHandlerOptions {
  */
 declare function createWebhookHandler(options: WebhookHandlerOptions): (request: Request) => Promise<Response>;
 
-export { AICPClient, type AICPClientOptions, AICPError, type AICPErrorCode, type AICPFieldDefinition, type AICPIntent, type AICPMessage, type AICPOrderPayload, type AICPOrderSchema, AICP_ERROR_CODES, AICP_PROTOCOL_VERSION, AICP_WEBHOOK_API_VERSION, type AgentApprovalStatus, type AgentProfile, type CreateOrderRequest, type FetchLike, type FieldType, IDEMPOTENCY_KEY_PATTERN, type OrderItemInput, type OrderResponse, type OrderStatus, type PaymentProvider, type PlatformDocument, type PrepareDeliveryRequest, type PrepareDeliveryResponse, type PublicSigningJwk, type RegisterAgentRequest, type RegisterAgentResponse, type SignatureFailure, type SigningKeyPair, type ValidationResult, WEBHOOK_SIGNATURE_COMPONENTS, type WebhookEvent, type WebhookHandlerOptions, WebhookOrderTracker, type WebhookVerificationRequest, contentDigest, contentDigestMatches, createWebhookHandler, generateSigningKey, isValidIdempotencyKey, jwkThumbprint, newIdempotencyKey, parsePublicSigningJwk, parseSignatureHeaders, requiredRequestComponents, signMessage, signatureBase, signingKeyFromPrivateJwk, validateAICPAnswers, verifyRequestSignature, verifyWebhookSignature, webhookVerificationResponse };
+export { AICPClient, type AICPClientOptions, AICPError, type AICPErrorCode, type AICPFieldDefinition, type AICPIntent, type AICPJsonSchema, type AICPJsonSchemaProperty, type AICPMessage, type AICPOrderPayload, type AICPOrderSchema, AICP_ERROR_CODES, AICP_PROTOCOL_VERSION, AICP_WEBHOOK_API_VERSION, type AgentApprovalStatus, type AgentProfile, type CreateOrderRequest, type CurrencyCode, type FetchLike, type FieldType, IDEMPOTENCY_KEY_PATTERN, type OrderItemInput, type OrderResponse, type OrderStatus, type PaymentProvider, type PlatformDocument, type PrepareDeliveryRequest, type PrepareDeliveryResponse, type PublicSigningJwk, type RegisterAgentRequest, type RegisterAgentResponse, type SignatureFailure, type SigningKeyPair, type ValidationResult, WEBHOOK_SIGNATURE_COMPONENTS, type WebhookEvent, type WebhookHandlerOptions, WebhookOrderTracker, type WebhookVerificationRequest, contentDigest, contentDigestMatches, createWebhookHandler, generateSigningKey, isValidIdempotencyKey, jwkThumbprint, newIdempotencyKey, parsePublicSigningJwk, parseSignatureHeaders, requiredRequestComponents, signMessage, signatureBase, signingKeyFromPrivateJwk, toJsonSchema, validateAICPAnswers, verifyRequestSignature, verifyWebhookSignature, webhookVerificationResponse };

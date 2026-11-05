@@ -14,9 +14,9 @@ state. The agent sends inputs. The platform decides.
 
 | You are building… | Use |
 |---|---|
-| An **AI agent** that orders from AICP stores | `AICPClient`, `generateSigningKey`, `createWebhookHandler` |
+| An **AI agent** that orders from AICP stores | `AICPClient`, `generateSigningKey`, `createWebhookHandler`, `toJsonSchema` |
 | An **AICP platform / store backend** | `validateAICPAnswers`, `verifyRequestSignature`, `signMessage`, wire types |
-| A store **contract** (what an agent must collect) | `AICPOrderSchema` + `validateAICPAnswers` |
+| A store **contract** (what an agent must collect) | `AICPOrderSchema` + `validateAICPAnswers` + `toJsonSchema` |
 
 - Spec: [`spec/AICP-v1.md`](spec/AICP-v1.md) (normative)
 - Guides: [`docs/agent-quickstart.md`](docs/agent-quickstart.md) · [`docs/webhooks.md`](docs/webhooks.md) · [`docs/errors.md`](docs/errors.md)
@@ -117,6 +117,9 @@ const bikeRental: AICPOrderSchema = {
 
 const result = validateAICPAnswers(bikeRental, { store_id: 's1', idempotency_key: 'req-abc-456', answers });
 if (!result.isValid) return Response.json({ error: 'SCHEMA_VALIDATION_FAILED', details: result.errors }, { status: 400 });
+
+// Convert the contract to standard JSON Schema for MCP inputSchema or LLM tool parameters:
+const inputSchema = toJsonSchema(bikeRental);
 ```
 
 ## Signatures without the client
@@ -141,8 +144,8 @@ Object.entries(signMessage({ ...message, body, privateJwk, kid, components: requ
 | `createWebhookHandler(opts)` | Fetch-API webhook receiver |
 | `verifyWebhookSignature`, `WebhookOrderTracker`, `webhookVerificationResponse` | Low-level webhook pieces |
 | `signMessage`, `verifyRequestSignature`, `requiredRequestComponents`, `contentDigest`, `contentDigestMatches`, `parsePublicSigningJwk`, `jwkThumbprint` | RFC 9421 / 9530 profile |
-| `validateAICPAnswers`, `AICPOrderSchema`, `AICPFieldDefinition` | Contract validation |
-| `AICP_ERROR_CODES`, `isValidIdempotencyKey`, wire types (`AgentProfile`, `CreateOrderRequest`, `PrepareDeliveryResponse`, `WebhookEvent`, …) | Protocol constants and types |
+| `validateAICPAnswers`, `toJsonSchema`, `AICPOrderSchema`, `AICPFieldDefinition` | Contract validation and JSON Schema conversion for MCP / LLM tools |
+| `AICP_ERROR_CODES`, `isValidIdempotencyKey`, wire types (`AgentProfile`, `CreateOrderRequest`, `PrepareDeliveryResponse`, `WebhookEvent`, `CurrencyCode`, `PaymentProvider`, …) | Protocol constants and types |
 
 ## Scope
 

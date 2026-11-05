@@ -6,7 +6,8 @@ export const AICP_WEBHOOK_API_VERSION = '2026-10-21';
 
 export type AgentApprovalStatus = 'PENDING' | 'APPROVED' | 'EXPIRED' | 'REVOKED';
 export type OrderStatus = 'pending_confirmation' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-export type PaymentProvider = 'promptpay' | 'cash_on_delivery';
+export type CurrencyCode = 'THB' | (string & {});
+export type PaymentProvider = 'promptpay' | 'cash_on_delivery' | (string & {});
 
 export interface AgentProfile {
   agent_id: string;
@@ -57,7 +58,7 @@ export interface PrepareDeliveryResponse {
   subtotal: number;
   delivery_fee: number;
   total: number;
-  currency: 'THB';
+  currency: CurrencyCode;
   expires_at: number;
   message: string;
   messages: AICPMessage[];
@@ -79,7 +80,7 @@ export interface WebhookEvent {
     order_version: number | null;
     occurred_at: string | null;
     total: number;
-    currency: 'THB';
+    currency: CurrencyCode;
     updated_at: string;
     tracking_url: string | null;
   };
